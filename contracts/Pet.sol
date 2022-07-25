@@ -17,7 +17,11 @@ contract Pet is ERC721URIStorage, ERC721Enumerable, Ownable {
     mapping(uint256 => uint256) public tokenIdToValue;
 
     // TODO: declare the event of minting the NFTs including the ID, price, and string token URI.
-    
+    event NFTMinted (
+        uint id,
+        uint price,
+        string tokenURI
+    );
 
     constructor() ERC721("Pet", "PET") {}
 
@@ -29,7 +33,8 @@ contract Pet is ERC721URIStorage, ERC721Enumerable, Ownable {
     // Note that _tokenIds.current() will return the id of the token that will be created next.
     // Use require or revert to throw an error if no tokens have been created yet.
     function currentTokenId() view public returns (uint256) {
-        return 0;
+        require(_tokenIds.current() > 0, "No Tokens have been created yet");
+        return (_tokenIds.current() - 1);
     }
     
     // TODO: Implement setTokenURI() to link the tokenID to a string URI.
@@ -38,11 +43,11 @@ contract Pet is ERC721URIStorage, ERC721Enumerable, Ownable {
         returns (bool)
     {
         // TODO: Require that the account connected to the contract isn't the zero address.
-
+        require(msg.sender != address(0), "Invalid message sender: Zero Address");
         // TODO: Require that the tokenId exists.
-
+        require(tokenId < currentTokenId(), "TokenID does not exist");
         // TODO: Call _setTokenURI to link the URI to the token.  See ERC721URIStorage.sol.
-        
+        _setTokenURI(tokenId, _tokenURI);
         return true;
     }
     
@@ -52,21 +57,21 @@ contract Pet is ERC721URIStorage, ERC721Enumerable, Ownable {
         returns (uint256)
     {
         // TODO: Require that the account connected to the contract isn't the zero address.
-
+        require(recipient != address(0), "Invalid Address: Address is the zero address");
         // TODO: Get the id of the token that will be created next.
-
+        uint id = _tokenIds.current();
         // TODO: Set the NFT Price in the record.
-
+        tokenIdToValue[id] = _nftPrice;
         // TODO: Use _mint() to create a token and send it to the recipient.  See ERC721.sol.
-
+        _mint(recipient, id); // TokenID must exist, does id exist?
         // TODO: Use _setTokenURI() to link the token's id with the proper token URI.
-
+        _setTokenURI(id, _tokenURI);
         // TODO: Increment _tokenIds.
-
+        _tokenIds.increment();
         // TODO: Emit a Minted event with the NFT's id, price, and URI.
-
+        emit NFTMinted(id, _nftPrice, _tokenURI);
         // TODO: Return the NFT's id.
-
+        return id;
     }
 
     function tokenPrice(uint256 _tokenId) public view returns (uint256) {
@@ -79,23 +84,25 @@ contract Pet is ERC721URIStorage, ERC721Enumerable, Ownable {
 
     // TODO: Use the super keyword to call inherited versions of these functions from parent contracts.
     function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
-        
+        super.supportsInterface(interfaceId);
     }
 
     function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721URIStorage) {
-        
+        super._burn(tokenId);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721Enumerable) {
-        
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 
     function tokenURI(uint256 tokenId) view public override(ERC721, ERC721URIStorage) returns (string memory) {        
-        
+        return super.tokenURI(tokenId);
     }
     
     // If an error in VSCode saying "Function needs to specify overridden contracts...", ignore it.
     function transferFrom(address from, address to, uint256 tokenId) public virtual override {
         // TODO: Call _beforeTokenTransfer() before using super.transferFrom().
+        _beforeTokenTransfer(from, to, tokenId);
+        super.transferFrom(from, to, tokenId);
     }
 }

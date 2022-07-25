@@ -7,23 +7,27 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // TODO: Create a contract named "Paw" that inherits from ERC20 and Ownable.
 // See Pet.sol for syntax.
 
-{
+contract Paw is ERC20, Ownable {
   // TODO: Set the private air drop amount at any number.
-
+  uint private airdropSupply = 1000;
 
   // TODO: Write the constructor for the PAW token and _mint() to msg.sender any number of tokens.
-
+  constructor() ERC20 ("Paw", "PAW") {
+    _mint(msg.sender, 1000);
+  }
   
   // TODO: Write a public function requestAirdrop() that calls airdropTo() 
   // and transfer the air drop amount of tokens to the account connected to the contract.
-  {
-    
+  function requestAirdrop(uint amount) public {
+    airdropTo(msg.sender, amount);
   }
   
 
   // TODO: Write a private function airdropTo() that takes in a recipient address and an amount 
   // and _transfer() that amount of tokens from the contract owner (see owner()) to the recipient.
-  {
-    
+  function airdropTo(address recipient, uint amount) private {
+      _transfer(owner(), recipient, amount);
+      // does owner need to approve of this transfer 
   }
+  
 }
